@@ -1,4 +1,6 @@
-from fastapi import FastAPI,HTTPException
+import os
+import uvicorn
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from conversion_braille import convert_to_braille, convert_to_english  # Import conversion functions
 from fastapi.responses import StreamingResponse
@@ -7,11 +9,10 @@ from sign import text_to_sign_stream
 
 app = FastAPI()
 
-
-#Added Cors Middleware
+# Added CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500"],  # Replace with the URL of your frontend
+    allow_origins=["*"],  # Allow requests from any origin (Update for security)
     allow_credentials=True,
     allow_methods=["*"],  # Allow all methods
     allow_headers=["*"],  # Allow all headers
@@ -37,7 +38,7 @@ async def stream_sign_images(text: str):
     """API endpoint to stream sign language images based on input text."""
     return StreamingResponse(text_to_sign_stream(text), media_type="multipart/x-mixed-replace; boundary=frame")
 
-
-
-
-
+# Run the FastAPI application on the correct port
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))  # Get port from environment variable, default to 8000
+    uvicorn.run(app, host="0.0.0.0", port=port)
