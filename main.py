@@ -69,33 +69,27 @@ async def text_to_speech(request: TextRequest):
     try:
         url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={GOOGLE_API_KEY}"
 
-        # Prepare API request data
         data = {
             "input": {"text": request.text},
-            "voice": {"languageCode": "en-US", "ssmlGender": "NEUTRAL"},
+            "voice": {"languageCode": "en-US", "ssmlGender": "MALE","name":"en-US-Wavenet-D"},
             "audioConfig": {"audioEncoding": "MP3"}
         }
 
-        # Send request to Google Text-to-Speech API
         response = requests.post(url, json=data)
         response_json = response.json()
 
-        # Check if the response contains audio content
         if "audioContent" not in response_json:
             raise HTTPException(status_code=500, detail="Error generating speech")
 
-        # Decode the base64-encoded audio content
         audio_data = base64.b64decode(response_json["audioContent"])
 
-        # Write the raw audio data to a file
-        audio_file_path = "output.mp3"
-        with open(audio_file_path, "wb") as audio_file:
-            audio_file.write(audio_data)
-
-        return {"message": "Audio file saved", "audio_file": audio_file_path}
+        return StreamingResponse(io.BytesIO(audio_data), media_type="audio/mpeg", headers={
+            "Content-Disposition": "attachment; filename=speech.mp3"
+        })
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # ✅ Speech to Text End Point
 @app.post("/speech_to_text/")
