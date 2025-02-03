@@ -8,11 +8,11 @@ from sign import text_to_sign_stream
 from fastapi import FastAPI, HTTPException, File, UploadFile
 import google.generativeai as genai
 import requests
-from google.cloud import texttospeech, speech
 import base64
+from dotenv import load_dotenv
 from PIL import Image
 import io
-from dotenv import load_dotenv
+
 
 app = FastAPI()
 
